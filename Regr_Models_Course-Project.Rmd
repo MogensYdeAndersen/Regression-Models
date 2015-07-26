@@ -1,0 +1,174 @@
+---
+title: "Is transmission a key to better car mileage?"
+author: "Mogens Yde-Andersen"
+date: "26. jul. 2015"
+output:
+  html_document:
+    theme: united
+    toc: yes
+  md_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+###Executive Summary
+
+In the years after 1^st^ Oil Crisis many americans asked themselves: "Is an automatic or manual transmission better for the Miles Per Gallon performance of my next car?  A "flat" comparison between two groups of 1973-4 car models with automation gear or with manual gear shows that "manuals" go x,x miles per gallon more than "automatics." But that is far from the whole story.
+
+Transmission as THE explaining factor for better MPG performance is wrong. 4 different data model suggests entirely different outcome regressor connections, which makes it impossible to say something definitive about transmission as factor for the mileage outcome.
+
+One model suggests that manual gear cars yields better mileage over automatic egar cars. Another data model ignores transmission, and two 2 data models contains transmission as a factor and cannot reject that manual gear cars are better for mileage than automatic cars, but they can not reject a draw neither.
+
+And it all depence on an acceptance of a shift fra automatic transmission to manual transmission as a so called "one unit increase in transmission as a discrete variable""
+
+###Automatic gear cars versus manual gear cars
+We have access to the mtcars  car data set with 11 variables including MPG and transmission type. By taking the mean of MPG for all automatic gear cars ("automatics") and for all manual gear cars ("manuals"), manuals (men of 24,4 MPG) outperforms automatics (mean of 17.1) by a difference of 7,2 MPG. This is done with a one-dim. t-test comparison. See the difference in figure 1 in appendix (app), sa well as the calculated data i app A.
+
+###Is transmission really the true key question?
+No. Many factors play a part of the collected performance of the MPG outcome. But how important is transmission then?
+
+By fitting all variables into a all encompassing linear regression-data model (the "All in"" model), the data set itself shows each variables importance as a causal factor for the outcome MPG. The calculation is in app B shows what one unit increase for a given variabel will give in changed outcome MPG in the Estimat column. The "All in" data model and equation:
+
+Outcome MPG = 12,3 -(0,11*cylinders) +(0.01*displacement) -(0.02*horsepower) +(0.79*rearaxleratio) -(3.72*weight) +(0.82*1/4miletime) +(0.32*V/S) +(2.52*transmission) +(0.65*gear) -(0.20*carburetors)
+
+The "All in"" data model tells us that shifting from "automatic" to "manual" will increase mileage by 2,52 MPG with a standard error of 2.06. An increase with 95% certainty will fall within an interval of [-0.86,5.90]in increased MPG. A 1000 lbs. increase in weight impacts outcome MPG negatively by 3.71 MPG. Accordingly it is possible to see in app B, how much one unit change in the variable will change outcome MPG. So transmission is far from being the main explaining factor behind better mileage.
+
+###Data models for prediction of mileage
+
+The "All in" data model contains as many as 10 variables without considering correlation/redundance between the variables and risk of unnecessary variance inflation
+
+A objective tree analysis can crystallize the variables that differentiate the data points the most with regard to the outcome MPG. See fig. 2 i app. It reveals weight, cylinders and horse power as the three most influential factors. I call it the "Top 3 differentiator" data model. See summary in app C. Top 3 differentiator data model and equation:
+
+Outcome MPG = 38.75 -(0.94*cylinders) -(0.02*horsepower) -(3.17*weight)
+
+The "Build up"-model is built up (manually) from bottom by putting the one variables at a time in a "empty" model to see, which "1-variabel"-model yields the best (lowest) model P-value. That is weight. Then weight is combined with one other variabel, one at a time into a "2-variables"-model. The lowest P-value yielding combination is weight + cylinders. This winning combination is then combined with one new variable into a "3-variables"-model with each of the remaining variables, each at a time. The winning "3 variables"-model combination is weight + cylindres + horsepower. hi T ...and so on. The winning "5 variables"-model is weight + cylinders + horse power + transmission and 1/4 mile time. Se summary in app D. The "Build up" data model and equation:
+
+Outcome MPG = 19.35 -(3.15*weight) -(0.15*cylinders) -(0.02*horsepower) +(2.73*transmission) + (0.74*"1/4miletime)
+
+The final model is the "Leave out"-model" that pulls out the most unwanted variables due to their high P-value contribution - one at a time.  You start with the "All in"-model. You scan the variables' P-values. Cylinders has the highest P-value and is removed. The model is refitted. Next variable to remove is V/S due to highest P-value. And so on. I stopped, when the model contains 5 variables due to a relatively low P-value score and highest adjusted residuals second to the power score for the model and by having not too few and neither too many variables. Se summary in app E and code for the "Leave out"" model in app F. The leave out data model and equation:
+
+Outcome MPG = 14,36 + (0.01*displacement) -(0.02*horsepower) -(4.08*weight)  +(1.01*1/4 miletime) +(3.47*transmission)
+
+When overlooking the 4 data models, note that transmission does not appear to be among the top 3 big differentiators, but transmission does show up on a 4^th or 5^th^ place in the two ladder models.
+
+###What the data models show
+
+Figure: Overview of the 4 data models
+```{r, echo=FALSE}
+library(knitr)
+l1 <- c('Model','Variables','Transm. impact on MPG','Std.Error','95% conf. int.')
+l2 <- c('All in','All 10 variables','2,52 MPG','2.06 MPG','[-0.86,5.90] MPG')
+l3 <- c('Top 3 diff.','Weight Cyl HP','NA','NA','NA')
+l4 <- c('Build up','Weight Cyl HP trans. 1/4 mile time','2.73 MPG','1.72 MPG','[-0.11,5.57] MPG')
+l5 <- c('Leave out','Weight Disp. HP Transm. 1/4 mile time','3.48 MPG','1.49 MPG','[1.03,5.91] MPG')
+fig <- data.frame(rbind(l1,l2,l3,l4,l5))
+kable(fig, row.names = NA, output=TRUE)
+```
+
+The "All in"" data model and the "Build up"" data model fail to reject the claim about the increase in MPG outcome due to a shift to "manuals" from "automatics." It can not be ruled out either that it is not the case due to the appearance of "0" in the confidence interval. The Top 3 differentiator data model does not say anything about a connection between transmission and outcome MPG. The "Leave out" data model fail to reject that "manuals" instead of "Automatics" lead to a positive change in outcome MPG. It is supported by the purely positive confidence interval.
+
+The models come with one major misrepresentation of facts. In the model automatic gear cars has the 0 at the transmission value, where as manual gear cars takes the value 1. All 4 models build on the assumption that an increase in a given variable impacts the outcome mileage in MPG. But can you say that going from transmission type automatic gear to manual gear is an increase? If you are willing to neglect this qualitative error, go on. Otherwise stop reading here.
+
+The robustness of the models also depends how the residuals behave. Correlation can induce variance inflation into models.  See app H-I. The "All in" model does have that. Mainly on the variable displacement. The "Top 3 differentor model does not seem to have any worthy to mention. The "Build up" model may have some  on the cylindre variable and the "Leave out" model on the displacement variable. Se code in app. The so called anova function indicates, whether the data models have too few, too many or a suitable number variables. See app G for the code to run for checking the residuals and do the diagnostics. "All in has somewhat of. Namely the displacement variable. The Top 3 differentiator"" data model may have too few variables. The "1/4 mile time" variable semms to be one variable too many in the "Build up" data model. The "Leave out" data model should perhaps only contain of weight, 1/2 mile time, transmission and horse power. And finally, the regression models are linear without interaction or polynomia. A better data model and a better representation of the truth may be out there.
+
+###Appendix
+
+Appendix Figure 1: "Mileage for cars with automatic or manual gear"
+```{r, echo=FALSE,fig.height=5}
+data(mtcars)
+boxplot(mpg ~ am, mtcars, col=c("deepskyblue","palegreen1"), xlab = "Transmission: 0 Automatic gear 1 Manual gear", ylab = "Mean mileage (miles per gallon)", main = "Fig.7: Mileage for cars with automatic or manual gear")
+```
+
+Appendix A "T-test of mileage of manual gear cars vs. automatic gear cars"
+```{r, echo=FALSE}
+mtcars_man <- subset(mtcars, am==1);mtcars_auto <- subset(mtcars, am==0);t.test(mtcars_man$mpg,mtcars_auto$mpg)
+```
+
+Appendix B Summary of the "All in" data model
+```{r, echo=FALSE}
+all_in <- lm(mpg ~ cyl + disp + hp + drat + wt + qsec + vs + as.factor(am) + gear + carb, data = mtcars)
+summary(all_in);aiconf <- 2.52023+c(-1,1)*qnorm(.95)*2.05665;aiconf
+```
+
+Appendix Figure 2 Tree dendrogram diagram of the mtcars data set
+```{r, echo=FALSE, fig.height=4}
+library(tree);library(ggplot2);library(ggdendro);data(mtcars);mtcars.ltr <- tree(mpg ~., data = mtcars)
+tree_data <- dendro_data(mtcars.ltr)
+g <- ggplot(segment(tree_data))
+g = g + geom_segment(aes(x = x, y = y, xend = xend, yend = yend, size = n), colour = "blue", alpha = 0.3)
+g = g + scale_size("n")
+g = g + geom_text(data = label(tree_data), aes(x = x, y = y, label = label), vjust = -0.1, size = 10)
+g = g + geom_text(data = leaf_label(tree_data), aes(x = x, y = y, label = label), vjust = 0.5, size = 10)
+g = g + theme_dendro()
+g
+```
+
+Appendix C Summary of the "Top 3 differantiator" data model
+```{r, echo=FALSE}
+top3_diff <- (lm(mpg ~ wt + cyl + hp, data = mtcars));summary(top3_diff)
+```
+
+Appendix D Summary of the "Build up" data model
+```{r, echo=FALSE}
+build_up <- (lm(mpg ~ wt + cyl + hp + as.factor(am) + qsec, data = mtcars));summary(build_up)
+```
+
+Appendix E Summary of the "Leave out" data model
+```{r, echo=FALSE}
+leave_out <- (lm(mpg ~ disp + hp + wt + qsec + as.factor(am), data = mtcars));summary(leave_out)
+```
+
+Appendix F Code for the "Leave out" iterated down to three variables
+```{r, echo=TRUE, results='hide'}
+data(mtcars)
+all <- lm(mpg ~ ., data = mtcars);summary(all);ar_full <- summary(all)$adj.r.squared
+# Leaveout one variable at a time
+lm_k9 <- update(all, ~. -cyl );summary(lm_k9);ar_k9 <- summary(lm_k9)$adj.r.squared
+lm_k8 <- update(lm_k9, ~. -vs);summary(lm_k8);ar_k8 <- summary(lm_k8)$adj.r.squared
+lm_k7 <- update(lm_k8, ~. -carb);summary(lm_k7);ar_k7 <- summary(lm_k7)$adj.r.squared
+lm_k6 <- update(lm_k7, ~. -gear);summary(lm_k6);ar_k6 <- summary(lm_k6)$adj.r.squared
+lm_k5 <- update(lm_k6, ~. -drat);summary(lm_k5);ar_k5 <- summary(lm_k5)$adj.r.squared
+lm_k4 <- update(lm_k5, ~. -disp);summary(lm_k4);ar_k4 <- summary(lm_k4)$adj.r.squared
+lm_k3 <- update(lm_k4, ~. -hp);summary(lm_k3);ar_k3 <- summary(lm_k3)$adj.r.squared
+```
+
+Appendix G Correlation between all variables in mtcars data set
+```{r, echo=TRUE, results='hide'}
+data(mtcars);cor(mtcars)
+```
+
+Appendix H Variance inflation in the 4 data models
+```{r, echo=FALSE, results='hide'}
+library(car);sqrt(vif(all_in));sqrt(vif(top3_diff));sqrt(vif(build_up));sqrt(vif(leave_out))
+```
+
+Appendix I Code for residual Variance Estimation in 3 of the data models (anova function and detailed residual plots)
+```{r, echo=FALSE, results='hide'}
+top3_diff_rve0 <- lm(mpg ~ wt, data = mtcars)
+top3_diff_rve1 <- update(top3_diff_rve0, mpg ~ wt + cyl)
+top3_diff_rve2 <- update(top3_diff_rve0, mpg ~ wt + cyl + hp)
+anova(top3_diff_rve0,top3_diff_rve1,top3_diff_rve2)
+
+build_up_rve0 <- lm(mpg ~ wt, data = mtcars)
+build_up_rve1 <- update(build_up_rve0, mpg ~ wt + cyl)
+build_up_rve2 <- update(build_up_rve0, mpg ~ wt + cyl + hp)
+build_up_rve3 <- update(build_up_rve0, mpg ~ wt + cyl + hp + am)
+build_up_rve4 <- update(build_up_rve0, mpg ~ wt + cyl + hp + am + qsec)
+anova(build_up_rve0,build_up_rve1,build_up_rve2,build_up_rve3,build_up_rve4)
+
+leave_out_rve0 <- lm(mpg ~ wt, data = mtcars)
+leave_out_rve1 <- update(leave_out_rve0, mpg ~ wt + qsec)
+leave_out_rve2 <- update(leave_out_rve0, mpg ~ wt + qsec + am)
+leave_out_rve3 <- update(leave_out_rve0, mpg ~ wt + qsec + am + hp)
+leave_out_rve4 <- update(leave_out_rve0, mpg ~ wt + qsec + am + hp + disp)
+leave_out_rve5 <- update(leave_out_rve0, mpg ~ wt + qsec + am + hp + disp + drat)
+leave_out_rve6 <- update(leave_out_rve0, mpg ~ wt + qsec + am + hp + disp + drat + gear)
+leave_out_rve7 <- update(leave_out_rve0, mpg ~ wt + qsec + am + hp + disp + drat + gear + carb)
+leave_out_rve8 <- update(leave_out_rve0, mpg ~ wt + qsec + am + hp + disp + drat + gear + carb + vs)
+leave_out_rve9 <- update(leave_out_rve0, mpg ~ wt + qsec + am + hp + disp + drat + gear + carb + vs + cyl)
+anova(leave_out_rve0,leave_out_rve1,leave_out_rve2,leave_out_rve3, leave_out_rve4, leave_out_rve5, leave_out_rve6, leave_out_rve7, leave_out_rve8, leave_out_rve9)
+
+#The plots beneath are important for understanding the residuals situation - left out due to space scarcity
+#plot(all_in);plot(top3_diff);plot(build_up);plot(leave_out)
+```
